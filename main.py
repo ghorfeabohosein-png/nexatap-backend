@@ -25,13 +25,11 @@ def init_db():
 
 init_db()
 
-# مدل داده برای دریافت درخواست‌ها
 class ScoreUpdate(BaseModel):
     user_id: str
     username: str
     score: int
 
-# API ذخیره امتیاز در دیتابیس
 @app.post("/api/save_score")
 async def save_score(data: ScoreUpdate):
     try:
@@ -51,7 +49,6 @@ async def save_score(data: ScoreUpdate):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# API دریافت امتیاز کاربر از دیتابیس
 @app.get("/api/get_score/{user_id}")
 async def get_score(user_id: str):
     conn = sqlite3.connect(DB_FILE)
@@ -63,7 +60,6 @@ async def get_score(user_id: str):
     current_score = row[0] if row else 0
     return {"user_id": user_id, "score": current_score}
 
-# ظاهر مینی‌اپ (فرانت‌اند بازی)
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
     html_content = """
@@ -231,33 +227,52 @@ async def read_root():
             tg.expand();
 
             let score = 0;
-            let userId = "guest_user";
-            let userName = "مهمان";
+            let userId = "nexatap_user_default";
+            let userName = "بازیکن";
 
+            // شناسایی کاربر تلگرام یا استفاده از ذخیره محلی در صورت تست مرورگر
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
+                userId = String(tg.initDataUnsafe.user.id);
+                userName = tg.initDataUnsafe.user.first_name || "بازیکن";
+            } else {
+                // اگر توی تلگرام نبود (مثلا تو مرورگر تست می‌شد)، یک آی‌دی ثابت محلی می‌سازیم تا صفر نشود
+                let savedId = localStorage.getItem('nexatap_local_id');
+                if (!savedId) {
+                    savedId = 'user_' + Math.floor(Math.random() * 1000000);
+                    localStorage.setItem('nexatap_local_id', savedId);
+                }
+                userId = savedId;
+                userName = "کاربر تستی";
+            }
+
+            document.getElementById('userInfo').innerText = `سلام، ${userName}`;
             const scoreElement = document.getElementById('score');
             const tapButton = document.getElementById('tapButton');
             const saveBtn = document.getElementById('saveBtn');
-            const userInfo = document.getElementById('userInfo');
 
-            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                userId = String(tg.initDataUnsafe.user.id);
-                userName = tg.initDataUnsafe.user.first_name || "بازیکن";
-                userInfo.innerText = `سلام، ${userName}`;
-                
-                fetch(`/api/get_score/${userId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        score = data.score;
+            // دریافت امتیاز اولیه از سرور دیتابیس
+            fetch(`/api/get_score/${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    score = data.score;
+                    scoreElement.innerText = score;
+                })
+                .catch(err => {
+                    console.log("خطا در دریافت امتیاز از سرور، استفاده از حافظه محلی");
+                    let localScore = localStorage.getItem('nexatap_score_' + userId);
+                    if (localScore) {
+                        score = parseInt(localScore);
                         scoreElement.innerText = score;
-                    })
-                    .catch(err => console.log("خطا در دریافت امتیاز:", err));
-            } else {
-                userInfo.innerText = "نسخه آزمایشی";
-            }
+                    }
+                });
 
+            // تپ کردن روی دکمه
             tapButton.addEventListener('click', (e) => {
                 score += 1;
                 scoreElement.innerText = score;
+                
+                // ذخیره آنی در حافظه مرورگر جهت اطمینان
+                localStorage.setItem('nexatap_score_' + userId, score);
 
                 if (tg.HapticFeedback) {
                     tg.HapticFeedback.impactOccurred('medium');
@@ -279,6 +294,7 @@ async def read_root():
                 }, 600);
             });
 
+            // دکمه ذخیره موجودی (ارسال به سرور دیتابیس)
             saveBtn.addEventListener('click', () => {
                 if (tg.HapticFeedback) {
                     tg.HapticFeedback.notificationOccurred('success');
@@ -297,7 +313,7 @@ async def read_root():
                 })
                 .then(response => response.json())
                 .then(data => {
-                    alert("موجودی شما با موفقیت ذخیره شد! ✅");
+                    alert("موجودی شما با موفقیت در دیتابیس سرور ذخیره شد! ✅");
                 })
                 .catch(error => {
                     alert("خطا در ارتباط با سرور هنگام ذخیره.");
