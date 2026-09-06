@@ -28,12 +28,12 @@ async def read_root():
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 background-color: #0c0c1e;
             }
-            /* پس‌زمینه بازی: مستقیماً از عکس آپلود شده‌ی خودتان استفاده می‌کند */
+            /* پس‌زمینه بازی متصل به عکس character.jpg در گیت‌هاب */
             .game-container {
                 position: relative;
                 width: 100%;
                 height: 100%;
-                background-image: url('/logo-orginal.jpg');
+                background-image: url('character.jpg');
                 background-size: cover;
                 background-position: center;
                 display: flex;
@@ -42,14 +42,14 @@ async def read_root():
                 align-items: center;
             }
             
-            /* لایه تاریک‌کننده ملایم برای اینکه نوشته‌ها و دکمه‌ها کاملاً خوانا باشند */
+            /* لایه تاریک‌کننده ملایم برای وضوح نوشته‌ها و دکمه‌ها */
             .overlay {
                 position: absolute;
                 top: 0;
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: rgba(12, 12, 30, 0.25);
+                background: rgba(12, 12, 30, 0.2);
                 z-index: 1;
             }
 
@@ -93,7 +93,7 @@ async def read_root():
                 backdrop-filter: blur(8px);
             }
 
-            /* پنل پایین: دکمه استخراج در سمت چپ و دکمه تپ */
+            /* پنل پایین: دکمه ذخیره موجودی در سمت چپ و دکمه تپ */
             .main-content {
                 position: absolute;
                 bottom: 30px;
@@ -105,7 +105,7 @@ async def read_root():
                 padding: 0 20px;
             }
 
-            .claim-btn {
+            .save-btn {
                 background: linear-gradient(135deg, #f39c12, #d35400);
                 border: 2px solid #f1c40f;
                 border-radius: 16px;
@@ -117,7 +117,7 @@ async def read_root():
                 box-shadow: 0 8px 25px rgba(243, 156, 18, 0.5);
                 transition: transform 0.1s ease;
             }
-            .claim-btn:active {
+            .save-btn:active {
                 transform: scale(0.95);
             }
 
@@ -173,7 +173,7 @@ async def read_root():
             </div>
 
             <div class="main-content">
-                <button class="claim-btn" id="claimBtn">📥 استخراج ($NXTP)</button>
+                <button class="save-btn" id="saveBtn">💾 ذخیره موجودی</button>
                 <button class="tap-btn" id="tapButton">TAP!</button>
             </div>
         </div>
@@ -185,7 +185,7 @@ async def read_root():
             let score = 0;
             const scoreElement = document.getElementById('score');
             const tapButton = document.getElementById('tapButton');
-            const claimBtn = document.getElementById('claimBtn');
+            const saveBtn = document.getElementById('saveBtn');
             const userInfo = document.getElementById('userInfo');
 
             if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
@@ -219,11 +219,11 @@ async def read_root():
                 }, 600);
             });
 
-            claimBtn.addEventListener('click', () => {
+            saveBtn.addEventListener('click', () => {
                 if (tg.HapticFeedback) {
                     tg.HapticFeedback.notificationOccurred('success');
                 }
-                alert("موجودی شما با موفقیت ثبت شد!");
+                alert("موجودی شما با موفقیت ذخیره شد!");
             });
         </script>
     </body>
