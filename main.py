@@ -28,12 +28,12 @@ async def read_root():
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 background-color: #0c0c1e;
             }
-            /* پس‌زمینه گرافیکی با استفاده از تصویر اصلی کاراکتر و سکه‌های نئونی */
+            /* پس‌زمینه گرافیکی حرفه‌ای با کاراکتر دست به سینه و سکه‌های نئونی N */
             .game-container {
                 position: relative;
                 width: 100%;
                 height: 100%;
-                background-image: url('https://raw.githubusercontent.com/ghorfeabohosein-png/nexatap-backend/main/character.jpg'); /* در صورت نیاز لینک عکس رو اینجا تنظیم می‌کنیم */
+                background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop'); /* تصویر پس‌زمینه سایبرپانک نئونی نهایی */
                 background-size: cover;
                 background-position: center;
                 display: flex;
@@ -42,14 +42,14 @@ async def read_root():
                 align-items: center;
             }
             
-            /* لایه تاریک‌کننده ملایم روی تصویر برای خوانایی بهتر متن‌ها */
+            /* لایه تاریک‌کننده برای وضوح اجزای بازی */
             .overlay {
                 position: absolute;
                 top: 0;
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: rgba(12, 12, 30, 0.4);
+                background: linear-gradient(135deg, rgba(12, 12, 30, 0.75), rgba(26, 26, 62, 0.6));
                 z-index: 1;
             }
 
@@ -70,21 +70,15 @@ async def read_root():
                 padding: 8px 18px;
                 display: flex;
                 align-items: center;
-                gap: 8px;
-                box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
-                backdrop-filter: blur(5px);
-            }
-            .score-label {
-                font-size: 11px;
-                color: #a29bfe;
-                font-weight: bold;
-                letter-spacing: 1px;
+                gap: 10px;
+                box-shadow: 0 0 20px rgba(0, 255, 204, 0.4);
+                backdrop-filter: blur(8px);
             }
             .score-value {
-                font-size: 24px;
+                font-size: 26px;
                 font-weight: 900;
                 color: #ffd700;
-                text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+                text-shadow: 0 0 12px rgba(255, 215, 0, 0.7);
             }
 
             /* خوش‌آمدگویی بالا سمت چپ */
@@ -97,50 +91,75 @@ async def read_root():
                 border: 1px solid rgba(255, 255, 255, 0.2);
                 border-radius: 15px;
                 padding: 8px 14px;
-                font-size: 12px;
+                font-size: 13px;
                 color: #00ffcc;
-                backdrop-filter: blur(5px);
+                backdrop-filter: blur(8px);
             }
 
-            /* ناحیه تعاملی برای تپ کردن روی کل صفحه یا مرکز */
-            .click-area {
+            /* بخش محتوای وسط و دکمه استخراج (Claim) در سمت چپ */
+            .main-content {
                 position: absolute;
-                top: 0;
-                left: 0;
+                bottom: 40px;
                 width: 100%;
-                height: 100%;
-                z-index: 5;
+                display: flex;
+                justify-content: space-around;
+                align-items: center;
+                z-index: 10;
+                padding: 0 20px;
+            }
+
+            /* دکمه استخراج در سمت چپ */
+            .claim-btn {
+                background: linear-gradient(135deg, #f39c12, #d35400);
+                border: 2px solid #f1c40f;
+                border-radius: 16px;
+                padding: 14px 24px;
+                font-size: 16px;
+                font-weight: bold;
+                color: white;
                 cursor: pointer;
+                box-shadow: 0 8px 25px rgba(243, 156, 18, 0.5);
+                transition: transform 0.1s ease;
+            }
+            .claim-btn:active {
+                transform: scale(0.95);
+            }
+
+            /* دکمه اصلی تپ در مرکز */
+            .tap-btn {
+                width: 130px;
+                height: 130px;
+                background: linear-gradient(135deg, #6c5ce7, #00cec9);
+                border: none;
+                border-radius: 50%;
+                font-size: 22px;
+                font-weight: bold;
+                color: white;
+                cursor: pointer;
+                box-shadow: 0 10px 30px rgba(108, 92, 231, 0.6);
+                transition: transform 0.08s ease;
                 display: flex;
                 align-items: center;
                 justify-content: center;
             }
-
-            /* دکمه نامرئی یا افکت کلیک وسط صفحه روی کاراکتر */
-            .tap-target {
-                width: 220px;
-                height: 280px;
-                border-radius: 50%;
-                background: transparent;
-                outline: none;
-                border: none;
-                cursor: pointer;
+            .tap-btn:active {
+                transform: scale(0.92);
             }
 
-            /* افکت پرواز عدد هنگام تپ */
+            /* افکت پرواز امتیاز هنگام تپ */
             .floating-number {
                 position: absolute;
-                font-size: 28px;
+                font-size: 26px;
                 font-weight: 900;
                 color: #ffd700;
-                text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+                text-shadow: 0 0 10px rgba(255, 215, 0, 0.9);
                 pointer-events: none;
                 z-index: 20;
                 animation: floatUp 0.6s ease-out forwards;
             }
             @keyframes floatUp {
                 0% { opacity: 1; transform: translateY(0) scale(1); }
-                100% { opacity: 0; transform: translateY(-80px) scale(1.4); }
+                100% { opacity: 0; transform: translateY(-70px) scale(1.4); }
             }
         </style>
     </head>
@@ -149,23 +168,21 @@ async def read_root():
         <div class="game-container">
             <div class="overlay"></div>
 
-            <!-- اطلاعات کاربر در بالا سمت چپ -->
+            <!-- مشخصات کاربر بالا سمت چپ -->
             <div class="user-box" id="userInfo">بارگذاری...</div>
 
-            <!-- امتیاز در بالا سمت راست -->
+            <!-- امتیاز بالا سمت راست -->
             <div class="header-top">
                 <div class="score-box">
-                    <span style="font-size: 18px;">🪙</span>
-                    <div>
-                        <div class="score-label">SCORE</div>
-                        <div class="score-value" id="score">0</div>
-                    </div>
+                    <span style="font-size: 20px;">🪙</span>
+                    <div class="score-value" id="score">0</div>
                 </div>
             </div>
 
-            <!-- ناحیه کلیک روی کاراکتر -->
-            <div class="click-area" id="clickArea">
-                <div class="tap-target"></div>
+            <!-- پنل پایین: دکمه استخراج در سمت چپ و دکمه تپ -->
+            <div class="main-content">
+                <button class="claim-btn" id="claimBtn">📥 استخراج ($NXTP)</button>
+                <button class="tap-btn" id="tapButton">TAP!</button>
             </div>
         </div>
 
@@ -175,41 +192,50 @@ async def read_root():
 
             let score = 0;
             const scoreElement = document.getElementById('score');
+            const tapButton = document.getElementById('tapButton');
+            const claimBtn = document.getElementById('claimBtn');
             const userInfo = document.getElementById('userInfo');
-            const clickArea = document.getElementById('clickArea');
 
-            // تنظیم نام کاربر از تلگرام
+            // تشخیص نام کاربر از تلگرام
             if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
                 const userName = tg.initDataUnsafe.user.first_name || "بازیکن";
                 userInfo.innerText = `سلام، ${userName}`;
             } else {
-                userInfo.innerText = "نسخه وب";
+                userInfo.innerText = "نسخه آزمایشی";
             }
 
-            // منطق تپ روی صفحه و کاراکتر
-            clickArea.addEventListener('click', (e) => {
+            // منطق تپ کردن روی دکمه مرکزی
+            tapButton.addEventListener('click', (e) => {
                 score += 1;
                 scoreElement.innerText = score;
 
-                // لرزش گوشی
                 if (tg.HapticFeedback) {
                     tg.HapticFeedback.impactOccurred('medium');
                 }
 
-                // ایجاد عدد شناور در محل کلیک
-                const x = e.clientX;
-                const y = e.clientY;
+                // افکت عدد شناور
+                const rect = tapButton.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top;
 
                 const floatText = document.createElement('div');
                 floatText.className = 'floating-number';
                 floatText.innerText = '+1';
-                floatText.style.left = `${x - 15}px`;
-                floatText.style.top = `${y - 20}px`;
+                floatText.style.left = `${x - 10}px`;
+                floatText.style.top = `${y}px`;
                 
                 document.body.appendChild(floatText);
                 setTimeout(() => {
                     floatText.remove();
                 }, 600);
+            });
+
+            // دکمه استخراج
+            claimBtn.addEventListener('click', () => {
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('success');
+                }
+                alert("موجودی شما با موفقیت ثبت شد و به زودی به کیف پول بلاکچین منتقل خواهد شد!");
             });
         </script>
     </body>
