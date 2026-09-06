@@ -28,12 +28,12 @@ async def read_root():
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 background-color: #0c0c1e;
             }
-            /* پس‌زمینه بازی متصل به عکس character.jpg در گیت‌هاب */
+            /* پس‌زمینه متصل به لینک مستقیم گیت‌هاب شما */
             .game-container {
                 position: relative;
                 width: 100%;
                 height: 100%;
-                background-image: url('character.jpg');
+                background-image: url('https://raw.githubusercontent.com/ghorfeabohosein-png/nexatap-backend/main/character.jpg');
                 background-size: cover;
                 background-position: center;
                 display: flex;
@@ -42,14 +42,14 @@ async def read_root():
                 align-items: center;
             }
             
-            /* لایه تاریک‌کننده ملایم برای وضوح نوشته‌ها و دکمه‌ها */
+            /* لایه تاریک‌کننده ملایم */
             .overlay {
                 position: absolute;
                 top: 0;
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: rgba(12, 12, 30, 0.2);
+                background: rgba(12, 12, 30, 0.25);
                 z-index: 1;
             }
 
@@ -203,15 +203,15 @@ async def read_root():
                     tg.HapticFeedback.impactOccurred('medium');
                 }
 
-                const rect = tapButton.getBoundingClientRect();
-                const x = rect.left + rect.width / 2;
-                const y = rect.top;
+                const rect = tapButton.getBygetBoundingClientRect ? tapButton.getBoundingClientRect() : {left: window.innerWidth/2, top: window.innerHeight/2};
+                const x = e.clientX || (rect.left + rect.width / 2);
+                const y = e.clientY || rect.top;
 
                 const floatText = document.createElement('div');
                 floatText.className = 'floating-number';
                 floatText.innerText = '+1';
                 floatText.style.left = `${x - 10}px`;
-                floatText.style.top = `${y}px`;
+                floatText.style.top = `${y - 30}px`;
                 
                 document.body.appendChild(floatText);
                 setTimeout(() => {
