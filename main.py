@@ -10,7 +10,7 @@ async def read_root():
     <html lang="fa" dir="rtl">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
         <title>NexaTap - نکست‌تپ</title>
         <script src="https://telegram.org/js/telegram-web-app.js"></script>
         <style>
@@ -19,149 +19,154 @@ async def read_root():
                 user-select: none;
                 -webkit-user-select: none;
             }
-            body {
-                background: radial-gradient(circle at center, #1b1b3a 0%, #0f0f1a 100%);
-                color: #ffffff;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            body, html {
                 margin: 0;
                 padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background-color: #0c0c1e;
+            }
+            /* پس‌زمینه گرافیکی با استفاده از تصویر اصلی کاراکتر و سکه‌های نئونی */
+            .game-container {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                background-image: url('https://raw.githubusercontent.com/ghorfeabohosein-png/nexatap-backend/main/character.jpg'); /* در صورت نیاز لینک عکس رو اینجا تنظیم می‌کنیم */
+                background-size: cover;
+                background-position: center;
                 display: flex;
                 flex-direction: column;
-                align-items: center;
                 justify-content: space-between;
-                height: 100vh;
-                overflow: hidden;
+                align-items: center;
             }
-            .header {
-                margin-top: 20px;
-                text-align: center;
+            
+            /* لایه تاریک‌کننده ملایم روی تصویر برای خوانایی بهتر متن‌ها */
+            .overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(12, 12, 30, 0.4);
+                z-index: 1;
             }
-            .user-welcome {
-                font-size: 14px;
-                color: #00ffcc;
-                margin-bottom: 5px;
+
+            /* بخش بالای صفحه: امتیاز در بالا سمت راست */
+            .header-top {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                z-index: 10;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
             }
-            .token-title {
-                font-size: 18px;
-                font-weight: bold;
+            .score-box {
+                background: rgba(20, 20, 40, 0.85);
+                border: 2px solid #00ffcc;
+                border-radius: 20px;
+                padding: 8px 18px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+                backdrop-filter: blur(5px);
+            }
+            .score-label {
+                font-size: 11px;
                 color: #a29bfe;
+                font-weight: bold;
                 letter-spacing: 1px;
             }
-            .score-container {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                background: rgba(255, 255, 255, 0.05);
-                padding: 10px 25px;
-                border-radius: 30px;
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-                backdrop-filter: blur(4px);
-                margin: 10px 0;
-            }
-            .score-icon {
-                font-size: 28px;
-            }
-            .score {
-                font-size: 36px;
-                font-weight: 800;
+            .score-value {
+                font-size: 24px;
+                font-weight: 900;
                 color: #ffd700;
-                text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+                text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
             }
-            /* بخش کاراکتر و دکمه تپ */
-            .game-area {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                flex-grow: 1;
-                position: relative;
-            }
-            .character-container {
-                width: 140px;
-                height: 140px;
-                background: radial-gradient(circle, rgba(0,255,204,0.2) 0%, rgba(108,92,231,0) 70%);
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin-bottom: 20px;
-                animation: float 3s ease-in-out infinite;
-            }
-            .character-avatar {
-                font-size: 70px;
-                filter: drop-shadow(0 0 15px rgba(0, 255, 204, 0.6));
-            }
-            @keyframes float {
-                0% { transform: translateY(0px); }
-                50% { transform: translateY(-10px); }
-                100% { transform: translateY(0px); }
-            }
-            .tap-btn {
-                background: linear-gradient(135deg, #6c5ce7, #00cec9);
-                border: none;
-                border-radius: 50%;
-                width: 170px;
-                height: 170px;
-                font-size: 26px;
-                font-weight: bold;
-                color: #fff;
-                cursor: pointer;
-                box-shadow: 0 15px 30px rgba(108, 92, 231, 0.4), inset 0 4px 6px rgba(255, 255, 255, 0.3);
-                transition: transform 0.08s ease, box-shadow 0.08s ease;
-                outline: none;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            .tap-btn:active {
-                transform: scale(0.93);
-                box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);
-            }
-            .footer {
-                margin-bottom: 25px;
+
+            /* خوش‌آمدگویی بالا سمت چپ */
+            .user-box {
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                z-index: 10;
+                background: rgba(20, 20, 40, 0.85);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 15px;
+                padding: 8px 14px;
                 font-size: 12px;
-                color: #636e72;
-                letter-spacing: 0.5px;
+                color: #00ffcc;
+                backdrop-filter: blur(5px);
             }
-            /* افکت پرواز امتیاز روی صفحه هنگام کلیک */
+
+            /* ناحیه تعاملی برای تپ کردن روی کل صفحه یا مرکز */
+            .click-area {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 5;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* دکمه نامرئی یا افکت کلیک وسط صفحه روی کاراکتر */
+            .tap-target {
+                width: 220px;
+                height: 280px;
+                border-radius: 50%;
+                background: transparent;
+                outline: none;
+                border: none;
+                cursor: pointer;
+            }
+
+            /* افکت پرواز عدد هنگام تپ */
             .floating-number {
                 position: absolute;
-                font-size: 20px;
-                font-weight: bold;
-                color: #00ffcc;
+                font-size: 28px;
+                font-weight: 900;
+                color: #ffd700;
+                text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
                 pointer-events: none;
-                animation: fadeUp 0.6s ease-out forwards;
+                z-index: 20;
+                animation: floatUp 0.6s ease-out forwards;
             }
-            @keyframes fadeUp {
+            @keyframes floatUp {
                 0% { opacity: 1; transform: translateY(0) scale(1); }
-                100% { opacity: 0; transform: translateY(-60px) scale(1.3); }
+                100% { opacity: 0; transform: translateY(-80px) scale(1.4); }
             }
         </style>
     </head>
     <body>
 
-        <div class="header">
-            <div class="user-welcome" id="userInfo">در حال بارگذاری...</div>
-            <div class="token-title">NEXATAP ($NXTP)</div>
-        </div>
+        <div class="game-container">
+            <div class="overlay"></div>
 
-        <div class="game-area">
-            <!-- کاراکتر بازی -->
-            <div class="character-container">
-                <div class="character-avatar" id="charEmoji">🦊</div>
+            <!-- اطلاعات کاربر در بالا سمت چپ -->
+            <div class="user-box" id="userInfo">بارگذاری...</div>
+
+            <!-- امتیاز در بالا سمت راست -->
+            <div class="header-top">
+                <div class="score-box">
+                    <span style="font-size: 18px;">🪙</span>
+                    <div>
+                        <div class="score-label">SCORE</div>
+                        <div class="score-value" id="score">0</div>
+                    </div>
+                </div>
             </div>
 
-            <div class="score-container">
-                <span class="score-icon">🪙</span>
-                <span class="score" id="score">0</span>
+            <!-- ناحیه کلیک روی کاراکتر -->
+            <div class="click-area" id="clickArea">
+                <div class="tap-target"></div>
             </div>
-
-            <button class="tap-btn" id="tapButton">TAP!</button>
-        </div>
-
-        <div class="footer">
-            Secured by Telegram WebApp & Render
         </div>
 
         <script>
@@ -170,20 +175,19 @@ async def read_root():
 
             let score = 0;
             const scoreElement = document.getElementById('score');
-            const tapButton = document.getElementById('tapButton');
             const userInfo = document.getElementById('userInfo');
-            const gameArea = document.querySelector('.game-area');
+            const clickArea = document.getElementById('clickArea');
 
-            // تشخیص کاربر
+            // تنظیم نام کاربر از تلگرام
             if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                const userName = tg.initDataUnsafe.user.first_name || "کاربر عزیز";
-                userInfo.innerText = `خوش آمدید، ${userName}`;
+                const userName = tg.initDataUnsafe.user.first_name || "بازیکن";
+                userInfo.innerText = `سلام، ${userName}`;
             } else {
-                userInfo.innerText = "نسخه آزمایشی وب";
+                userInfo.innerText = "نسخه وب";
             }
 
-            // منطق تپ کردن با افکت پرواز امتیاز
-            tapButton.addEventListener('click', (e) => {
+            // منطق تپ روی صفحه و کاراکتر
+            clickArea.addEventListener('click', (e) => {
                 score += 1;
                 scoreElement.innerText = score;
 
@@ -192,18 +196,17 @@ async def read_root():
                     tg.HapticFeedback.impactOccurred('medium');
                 }
 
-                // ساخت عدد شناور روی صفحه
-                const rect = tapButton.getBoundingClientRect();
-                const x = e.clientX || (rect.left + rect.width / 2);
-                const y = e.clientY || (rect.top + rect.height / 2);
+                // ایجاد عدد شناور در محل کلیک
+                const x = e.clientX;
+                const y = e.clientY;
 
                 const floatText = document.createElement('div');
                 floatText.className = 'floating-number';
                 floatText.innerText = '+1';
-                floatText.style.left = `${x - 10}px`;
-                floatText.style.top = `${y - 40}px`;
+                floatText.style.left = `${x - 15}px`;
+                floatText.style.top = `${y - 20}px`;
                 
-                gameArea.appendChild(floatText);
+                document.body.appendChild(floatText);
                 setTimeout(() => {
                     floatText.remove();
                 }, 600);
