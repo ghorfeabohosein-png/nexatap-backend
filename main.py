@@ -153,35 +153,37 @@ async def read_root():
                 padding: 0 20px;
             }
             .save-btn {
-                background: linear-gradient(135deg, #f39c12, #d35400);
-                border: 2px solid #f1c40f;
+                background: linear-gradient(135deg, #2ecc71, #27ae60);
+                border: 2px solid #2ecc71;
                 border-radius: 16px;
-                padding: 12px 20px;
+                padding: 14px 20px;
                 font-size: 15px;
                 font-weight: bold;
                 color: white;
                 cursor: pointer;
-                box-shadow: 0 8px 25px rgba(243, 156, 18, 0.5);
+                box-shadow: 0 8px 25px rgba(46, 204, 113, 0.4);
                 transition: transform 0.1s ease;
             }
             .save-btn:active {
                 transform: scale(0.95);
             }
+            /* دکمه TAP زرد رنگ و کاملاً مشخص */
             .tap-btn {
-                width: 120px;
-                height: 120px;
-                background: linear-gradient(135deg, #6c5ce7, #00cec9);
-                border: none;
+                width: 130px;
+                height: 130px;
+                background: linear-gradient(135deg, #ffe600, #ff9900);
+                border: 4px solid #ffffff;
                 border-radius: 50%;
-                font-size: 22px;
-                font-weight: bold;
-                color: white;
+                font-size: 26px;
+                font-weight: 900;
+                color: #1a1a1a;
                 cursor: pointer;
-                box-shadow: 0 10px 30px rgba(108, 92, 231, 0.6);
+                box-shadow: 0 0 35px rgba(255, 230, 0, 0.8);
                 transition: transform 0.08s ease;
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
             }
             .tap-btn:active {
                 transform: scale(0.92);
@@ -230,12 +232,10 @@ async def read_root():
             let userId = "nexatap_user_default";
             let userName = "بازیکن";
 
-            // شناسایی کاربر تلگرام یا استفاده از ذخیره محلی در صورت تست مرورگر
             if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
                 userId = String(tg.initDataUnsafe.user.id);
                 userName = tg.initDataUnsafe.user.first_name || "بازیکن";
             } else {
-                // اگر توی تلگرام نبود (مثلا تو مرورگر تست می‌شد)، یک آی‌دی ثابت محلی می‌سازیم تا صفر نشود
                 let savedId = localStorage.getItem('nexatap_local_id');
                 if (!savedId) {
                     savedId = 'user_' + Math.floor(Math.random() * 1000000);
@@ -250,7 +250,6 @@ async def read_root():
             const tapButton = document.getElementById('tapButton');
             const saveBtn = document.getElementById('saveBtn');
 
-            // دریافت امتیاز اولیه از سرور دیتابیس
             fetch(`/api/get_score/${userId}`)
                 .then(response => response.json())
                 .then(data => {
@@ -266,12 +265,10 @@ async def read_root():
                     }
                 });
 
-            // تپ کردن روی دکمه
             tapButton.addEventListener('click', (e) => {
                 score += 1;
                 scoreElement.innerText = score;
                 
-                // ذخیره آنی در حافظه مرورگر جهت اطمینان
                 localStorage.setItem('nexatap_score_' + userId, score);
 
                 if (tg.HapticFeedback) {
@@ -294,7 +291,6 @@ async def read_root():
                 }, 600);
             });
 
-            // دکمه ذخیره موجودی (ارسال به سرور دیتابیس)
             saveBtn.addEventListener('click', () => {
                 if (tg.HapticFeedback) {
                     tg.HapticFeedback.notificationOccurred('success');
