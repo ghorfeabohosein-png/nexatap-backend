@@ -309,10 +309,10 @@ async def read_root():
                 })
                 .then(response => response.json())
                 .then(data => {
-                    alert("موجودی شما با موفقیت در دیتابیس سرور ذخیره شد! ✅");
+                    alert("موجودی شما با موفقیت ذخیره شد! ✅");
                 })
                 .catch(error => {
-                    alert("خطا در ارتباط با سرور هنگام ذخیره.");
+                    alert("خطا در هنگام ذخیره.");
                 });
             });
         </script>
