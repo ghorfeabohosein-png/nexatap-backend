@@ -28,12 +28,12 @@ async def read_root():
                 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 background-color: #0c0c1e;
             }
-            /* پس‌زمینه گرافیکی حرفه‌ای با کاراکتر دست به سینه و سکه‌های نئونی N */
+            /* پس‌زمینه بازی: مستقیماً از عکس آپلود شده‌ی خودتان استفاده می‌کند */
             .game-container {
                 position: relative;
                 width: 100%;
                 height: 100%;
-                background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop'); /* تصویر پس‌زمینه سایبرپانک نئونی نهایی */
+                background-image: url('/logo-orginal.jpg');
                 background-size: cover;
                 background-position: center;
                 display: flex;
@@ -42,26 +42,23 @@ async def read_root():
                 align-items: center;
             }
             
-            /* لایه تاریک‌کننده برای وضوح اجزای بازی */
+            /* لایه تاریک‌کننده ملایم برای اینکه نوشته‌ها و دکمه‌ها کاملاً خوانا باشند */
             .overlay {
                 position: absolute;
                 top: 0;
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: linear-gradient(135deg, rgba(12, 12, 30, 0.75), rgba(26, 26, 62, 0.6));
+                background: rgba(12, 12, 30, 0.25);
                 z-index: 1;
             }
 
-            /* بخش بالای صفحه: امتیاز در بالا سمت راست */
+            /* امتیاز در بالا سمت راست */
             .header-top {
                 position: absolute;
                 top: 20px;
                 right: 20px;
                 z-index: 10;
-                display: flex;
-                flex-direction: column;
-                align-items: flex-end;
             }
             .score-box {
                 background: rgba(20, 20, 40, 0.85);
@@ -96,10 +93,10 @@ async def read_root():
                 backdrop-filter: blur(8px);
             }
 
-            /* بخش محتوای وسط و دکمه استخراج (Claim) در سمت چپ */
+            /* پنل پایین: دکمه استخراج در سمت چپ و دکمه تپ */
             .main-content {
                 position: absolute;
-                bottom: 40px;
+                bottom: 30px;
                 width: 100%;
                 display: flex;
                 justify-content: space-around;
@@ -108,13 +105,12 @@ async def read_root():
                 padding: 0 20px;
             }
 
-            /* دکمه استخراج در سمت چپ */
             .claim-btn {
                 background: linear-gradient(135deg, #f39c12, #d35400);
                 border: 2px solid #f1c40f;
                 border-radius: 16px;
-                padding: 14px 24px;
-                font-size: 16px;
+                padding: 12px 20px;
+                font-size: 15px;
                 font-weight: bold;
                 color: white;
                 cursor: pointer;
@@ -125,10 +121,9 @@ async def read_root():
                 transform: scale(0.95);
             }
 
-            /* دکمه اصلی تپ در مرکز */
             .tap-btn {
-                width: 130px;
-                height: 130px;
+                width: 120px;
+                height: 120px;
                 background: linear-gradient(135deg, #6c5ce7, #00cec9);
                 border: none;
                 border-radius: 50%;
@@ -168,10 +163,8 @@ async def read_root():
         <div class="game-container">
             <div class="overlay"></div>
 
-            <!-- مشخصات کاربر بالا سمت چپ -->
             <div class="user-box" id="userInfo">بارگذاری...</div>
 
-            <!-- امتیاز بالا سمت راست -->
             <div class="header-top">
                 <div class="score-box">
                     <span style="font-size: 20px;">🪙</span>
@@ -179,7 +172,6 @@ async def read_root():
                 </div>
             </div>
 
-            <!-- پنل پایین: دکمه استخراج در سمت چپ و دکمه تپ -->
             <div class="main-content">
                 <button class="claim-btn" id="claimBtn">📥 استخراج ($NXTP)</button>
                 <button class="tap-btn" id="tapButton">TAP!</button>
@@ -196,7 +188,6 @@ async def read_root():
             const claimBtn = document.getElementById('claimBtn');
             const userInfo = document.getElementById('userInfo');
 
-            // تشخیص نام کاربر از تلگرام
             if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
                 const userName = tg.initDataUnsafe.user.first_name || "بازیکن";
                 userInfo.innerText = `سلام، ${userName}`;
@@ -204,7 +195,6 @@ async def read_root():
                 userInfo.innerText = "نسخه آزمایشی";
             }
 
-            // منطق تپ کردن روی دکمه مرکزی
             tapButton.addEventListener('click', (e) => {
                 score += 1;
                 scoreElement.innerText = score;
@@ -213,7 +203,6 @@ async def read_root():
                     tg.HapticFeedback.impactOccurred('medium');
                 }
 
-                // افکت عدد شناور
                 const rect = tapButton.getBoundingClientRect();
                 const x = rect.left + rect.width / 2;
                 const y = rect.top;
@@ -230,12 +219,11 @@ async def read_root():
                 }, 600);
             });
 
-            // دکمه استخراج
             claimBtn.addEventListener('click', () => {
                 if (tg.HapticFeedback) {
                     tg.HapticFeedback.notificationOccurred('success');
                 }
-                alert("موجودی شما با موفقیت ثبت شد و به زودی به کیف پول بلاکچین منتقل خواهد شد!");
+                alert("موجودی شما با موفقیت ثبت شد!");
             });
         </script>
     </body>
