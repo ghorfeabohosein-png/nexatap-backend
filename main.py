@@ -316,8 +316,7 @@ async def save_score(data: ScoreUpdate):
         conn.close()
         return {"status": "success", "message": "موجودی با موفقیت ذخیره شد!"}
     except Exception as e:
-        raise HTTPException(status_code=500, status.strerror(str(e)))
-
+raise HTTPException(status_code=500, status.strerror(str(e)))
 
 @app.get("/api/get_score/{user_id}")
 async def get_score(user_id: str):
