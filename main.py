@@ -1,18 +1,22 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 import sqlite3
 import os
+import requests
 
 app = FastAPI()
 
-# --- راه‌اندازی دیتابیس پیشرفته با تمام جدول‌های مورد نیاز ---
+# --- تنظیمات ربات تلگرام ---
+# توکن ربات خود را اینجا قرار دهید (یا از متغیرهای محیطی Render بخوانید)
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
+CHANNEL_USERNAME = os.getenv("CHANNEL_USERNAME", "@YourChannelUsername") # کانال اجباری شما مثل @NexaTapChannel
+
 DB_FILE = "database.db"
 
 def init_db():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    # جدول کاربران با قابلیت ذخیره کیف پول، امتیاز، وضعیت کانال و زیرمجموعه
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             user_id TEXT PRIMARY KEY,
@@ -87,6 +91,108 @@ async def get_user(user_id: str):
     else:
         return {"user_id": user_id, "score": 0, "wallet": "", "is_member": 0, "referrals_count": 0}
 
+# --- وب‌هوک تلگرام برای مدیریت دکمه‌ها و دستور /start ---
+@app.post("/webhook")
+async def telegram_webhook(req: Request):
+    data = await req.json()
+    
+    if "message" in data:
+        message = data["message"]
+        chat_id = message["chat"]["id"]
+        user = message.get("from", {})
+        user_id = str(user.get("id"))
+        username = user.get("username", "user")
+        first_name = user.get("first_name", "بازیکن")
+        language_code = user.get("language_code", "en")
+        text = message.get("text", "")
+
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        
+        # بررسی کاربر در دیتابیس
+        cursor.execute('SELECT user_id, referrals_count FROM users WHERE user_id = ?', (user_id,))
+        existing_user = cursor.fetchone()
+
+        if not existing_user:
+            # بررسی اینکه آیا با لینک رفرال آمده است یا خیر
+            if text.startswith("/start ref_"):
+                ref_id = text.split("ref_")[1]
+                if ref_id != user_id:
+                    # بررسی سقف 100 امتیاز برای معرف
+                    cursor.execute('SELECT score, referrals_count FROM users WHERE user_id = ?', (ref_id,))
+                    referrer = cursor.fetchone()
+                    if referrer:
+                        ref_score, ref_count = referrer
+                        if ref_count < 20: # 20 نفر * 5 امتیاز = 100 امتیاز سقف
+                            cursor.execute('UPDATE users SET score = score + 5, referrals_count = referrals_count + 1 WHERE user_id = ?', (ref_id,))
+            
+            cursor.execute('INSERT OR IGNORE INTO users (user_id, username, score) VALUES (?, ?, 0)', (user_id, username))
+            conn.commit()
+
+        conn.close()
+
+        # تشخیص زبان خوش‌آمدگویی
+        if language_code.startswith("fa"):
+            welcome_text = f"سلام {first_name} عزیز! 🎮 به بازی نکست‌تپ خوش آمدید.\nبرای شروع تپ کنید، کیف پول خود را متصل کنید و سکه جایزه بگیرید!"
+            btn_play = "🚀 شروع بازی (مینی‌اپ)"
+            btn_wallet = "💳 کیف پول من"
+            btn_channel = "📢 عضویت در کانال"
+            btn_ref = "👥 لینک دعوت (رفرال)"
+        else:
+            welcome_text = f"Hello {first_name}! 🎮 Welcome to NexaTap.\nTap to earn, connect your wallet, and invite friends!"
+            btn_play = "🚀 Start Game (Mini App)"
+            btn_wallet = "💳 My Wallet"
+            btn_channel = "📢 Join Channel"
+            btn_ref = "👥 Referral Link"
+
+        # ساخت ۴ دکمه شیشه‌ای
+        keyboard = {
+            "inline_keyboard": [
+                [{"text": btn_play, "web_app": {"url": "https://nexatap-backend.onrender.com/"}}],
+                [{"text": btn_wallet, "callback_data": "check_wallet"}, {"text": btn_channel, "url": f"https://t.me/{CHANNEL_USERNAME.replace('@', '')}"}],
+                [{"text": btn_ref, "callback_data": "get_ref_link"}]
+            ]
+        }
+
+        # ارسال پیام به تلگرام
+        send_telegram_message(chat_id, welcome_text, keyboard)
+
+    elif "callback_query" in data:
+        query = data["callback_query"]
+        chat_id = query["message"]["chat"]["id"]
+        user_id = str(query["from"]["id"])
+        data_action = query["data"]
+
+        if data_action == "check_wallet":
+            conn = sqlite3.connect(DB_FILE)
+            cursor = conn.cursor()
+            cursor.execute('SELECT wallet FROM users WHERE user_id = ?', (user_id,))
+            row = cursor.fetchone()
+            conn.close()
+            w = row[0] if row and row[0] else "هنوز ثبت نشده است."
+            send_telegram_message(chat_id, f"💳 وضعیت کیف پول شما:\n{w}\n\nبرای تغییر یا ثبت ولت، وارد مینی‌اپ شوید.")
+
+        elif data_action == "get_ref_link":
+            ref_link = f"https://t.me/NexaTap_Bot?start=ref_{user_id}"
+            send_telegram_message(chat_id, f"👥 لینک دعوت اختصاصی شما:\n`{ref_link}`\n\nبا ارسال این لینک به دوستانتان، به ازای هر نفر ۵ امتیاز (تا سقف ۱۰۰ امتیاز) دریافت کنید!")
+
+    return {"status": "ok"}
+
+def send_telegram_message(chat_id, text, reply_markup=None):
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": chat_id,
+        "text": text,
+        "parse_mode": "Markdown"
+    }
+    if reply_markup:
+        payload["reply_markup"] = reply_markup
+    try:
+        requests.post(url, json=payload)
+    except Exception as e:
+        print(f"Error sending telegram message: {e}")
+
+# --- رابط کاربری مینی‌اپ (HTML/JS) ---
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
     html_content = """
@@ -156,7 +262,6 @@ async def read_root():
                 0% { opacity: 1; transform: translateY(0) scale(1); }
                 100% { opacity: 0; transform: translateY(-60px) scale(1.3); }
             }
-            /* مودال‌ها */
             .modal {
                 display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
                 background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center;
@@ -197,7 +302,6 @@ async def read_root():
             </div>
         </div>
 
-        <!-- مودال کیف پول -->
         <div class="modal" id="walletModal">
             <div class="modal-content">
                 <h3>اتصال کیف پول Ton</h3>
@@ -208,7 +312,6 @@ async def read_root():
             </div>
         </div>
 
-        <!-- مودال رفرال -->
         <div class="modal" id="refModal">
             <div class="modal-content">
                 <h3>سیستم دعوت (رفرال)</h3>
@@ -249,7 +352,6 @@ async def read_root():
             const walletBtn = document.getElementById('walletBtn');
             const refMenuBtn = document.getElementById('refMenuBtn');
 
-            // دریافت اطلاعات کاربر از سرور
             fetch(`/api/get_user/${userId}`)
                 .then(res => res.json())
                 .then(data => {
@@ -257,16 +359,13 @@ async def read_root():
                     scoreElement.innerText = score;
                     userWallet = data.wallet;
                     refCount = data.referrals_count;
-                    if (userWallet) {
-                        walletBtn.innerText = "✅ ولت متصل";
-                    }
+                    if (userWallet) { walletBtn.innerText = "✅ ولت متصل"; }
                 })
                 .catch(err => {
                     let localScore = localStorage.getItem('nexatap_score_' + userId);
                     if (localScore) { score = parseInt(localScore); scoreElement.innerText = score; }
                 });
 
-            // تپ کردن
             tapButton.addEventListener('click', (e) => {
                 score += 1;
                 scoreElement.innerText = score;
@@ -287,7 +386,6 @@ async def read_root():
                 setTimeout(() => floatText.remove(), 600);
             });
 
-            // ذخیره امتیاز
             saveBtn.addEventListener('click', () => {
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
                 fetch('/api/save_score', {
@@ -297,7 +395,6 @@ async def read_root():
                 }).then(res => res.json()).then(data => alert("موجودی با موفقیت ذخیره شد! ✅"));
             });
 
-            // مدیریت مودال‌ها
             walletBtn.addEventListener('click', () => {
                 document.getElementById('walletInput').value = userWallet;
                 document.getElementById('walletModal').style.display = 'flex';
